@@ -18,13 +18,24 @@ PHPTradingBot is a modular platform written in php using Laravel to automaticall
   -- AfterBuy()
     See /App/Modules/ProfitClone.php for example usage
 
+# Screenshots
+#### Signals Page
+![Alt text](https://98trading.com/git-images/screenshot5.png "Signals")
+#### Order History Page
+![Alt text](https://98trading.com/git-images/screenshot1.png "Order History")
+#### System Settings Page
+![Alt text](https://98trading.com/git-images/screenshot2.png "System Settings")
+#### Modules Page
+![Alt text](https://98trading.com/git-images/screenshot3.png "Custom Modules")
+#### Profitable Trade Cloner
+![Alt text](https://98trading.com/git-images/screenshot4.png "Profitable Trade Cloner")
 
 
 ### Installation
 
-PHPTradingBot requires PHP v7.X to run.
+PHPTradingBot requires PHP v7.x to run.
 
-follow these command sequence below to install PHPTradingBot
+Enter these commands to install
 
 ```sh
 $ git clone https://github.com/kavehs87/PHPTradingBot.git
