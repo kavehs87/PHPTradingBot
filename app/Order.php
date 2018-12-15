@@ -49,6 +49,7 @@ class Order extends Model
      */
     public static function buy($symbol, $quantity)
     {
+        $orderDefaults = Setting::getValue('orderDefaults');
 
         /*
          * Module Hook
@@ -90,10 +91,10 @@ class Order extends Model
         $order->timeInForce = $timeInForce;
         $order->type = $type;
         $order->side = $side;
-        $order->takeProfit = 3;
-        $order->stopLoss = 1;
-        $order->trailingTakeProfit = 1;
-        $order->trailingStopLoss = 0.2;
+        $order->takeProfit = isset($orderDefaults['tp']) ? $orderDefaults['tp'] : 2;
+        $order->stopLoss = isset($orderDefaults['sl']) ? $orderDefaults['sl'] : 2;
+        $order->trailingTakeProfit = isset($orderDefaults['ttp']) ? $orderDefaults['ttp'] : 1;
+        $order->trailingStopLoss = isset($orderDefaults['tsl']) ? $orderDefaults['tsl'] : 0.5;
 
         $order->save();
 

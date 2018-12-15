@@ -66,7 +66,10 @@
 
     <div style="clear: both;"></div>
 
-    @include('newPosition')
+    <div class="row">
+        <div class="col-md-4">@include('newPosition')</div>
+        <div class="col-md-4">@include('orderDefaults')</div>
+    </div>
 
 
 @endsection

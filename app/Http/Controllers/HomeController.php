@@ -190,4 +190,12 @@ class HomeController extends Controller
         return redirect()->back()->with('success');
     }
 
+    public function saveOrderDefaults(Request $request)
+    {
+        $data = $request->except('_token');
+        Setting::setValue('orderDefaults',$data['orderDefaults']);
+
+        return redirect()->back();
+    }
+
 }

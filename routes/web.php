@@ -26,6 +26,7 @@ Route::get('/modules/disable/{id}', 'HomeController@disableModule')->name('disab
 Route::get('/modules/install/{name}', 'HomeController@installModule')->name('installModule');
 Route::get('/modules/uninstall/{id}', 'HomeController@uninstallModule')->name('uninstallModule');
 Route::post('/saveSettings', 'HomeController@saveSettings')->name('saveSettings');
+Route::post('/saveOrderDefaults', 'HomeController@saveOrderDefaults')->name('saveOrderDefaults');
 try {
     if (!empty(\App\Modules::getMenus())) {
         foreach (\App\Modules::getMenus() as $menu) {
@@ -45,5 +46,5 @@ try {
 
 
 Route::get('/debug', function () {
-    dd(\App\Modules::getMenus());
+    dd(\App\Modules::getModules());
 });

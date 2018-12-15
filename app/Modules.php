@@ -93,6 +93,8 @@ class Modules extends Model
             while (false !== ($entry = readdir($handle))) {
 
                 if ($entry != "." && $entry != "..") {
+                    if (strpos($entry,'.php') === false)
+                        continue;
                     if (self::checkModule($entry)) {
                         $modules[] = self::sanitizeModuleName($entry);
                     }
