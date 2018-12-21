@@ -8,14 +8,20 @@
         <div class="col-12">
             Select Pair
         </div>
+        {{--<div class="col-12">--}}
+        {{--<select id="pair">--}}
+        {{--@if(\Illuminate\Support\Facades\Cache::get('prices') != null)--}}
+        {{--@foreach(json_decode(\Illuminate\Support\Facades\Cache::get('prices'),true) as $pair => $price)--}}
+        {{--<option>{{$pair}}</option>--}}
+        {{--@endforeach--}}
+        {{--@endif--}}
+        {{--</select>--}}
+        {{--</div>--}}
         <div class="col-12">
-            <select id="pair">
-                @if(\Illuminate\Support\Facades\Cache::get('prices') != null)
-                    @foreach(json_decode(\Illuminate\Support\Facades\Cache::get('prices'),true) as $pair => $price)
-                        <option>{{$pair}}</option>
-                    @endforeach
-                @endif
-            </select>
+            <div class="ui-widget">
+                <label for="pair">Pair : </label>
+                <input id="pair">
+            </div>
         </div>
     </div>
     <div class="row">
@@ -28,7 +34,7 @@
     </div>
     <div class="row">
         <div class="col-12">
-        <div class="mt-2"></div>
+            <div class="mt-2"></div>
             <button onclick="openPosition()" class="btn btn-primary">
                 Buy
             </button>
@@ -42,4 +48,12 @@
         var quantity = document.getElementById("quantity").value;
         window.location.href = '/positions/new/' + pair + "/" + quantity;
     }
+</script>
+<script>
+    $(function () {
+        var availableTags = {!! json_encode(array_keys(json_decode(\Illuminate\Support\Facades\Cache::get('prices'),true))) !!};
+        $("#pair").autocomplete({
+            source: availableTags
+        });
+    });
 </script>

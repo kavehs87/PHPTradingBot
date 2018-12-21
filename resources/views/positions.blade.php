@@ -18,7 +18,7 @@
                 <th>Buy</th>
                 <th>Current</th>
                 <th>Quantity</th>
-                <th>Side</th>
+                {{--<th>Side</th>--}}
                 <th>IsTrailing</th>
                 <th>TP</th>
                 <th>SL</th>
@@ -51,7 +51,7 @@
                             <td>{{$order->price}}</td>
                             <td>{{$order->getCurrentPrice()}}</td>
                             <td>{{$order->origQty}}</td>
-                            <td>{{$order->side}}</td>
+                            {{--<td>{{$order->side}}</td>--}}
                             <td>
                                 @if($order->trailing)
                                     <a href="{{route('toggleTrailing',$order->id)}}" class="btn btn-secondary">Yes</a>
@@ -75,12 +75,11 @@
                             <td>{{$order->maxFloated}}</td>
                             <td>{{$order->minFloated}}</td>
                             <td>
-                                <button class="btn btn-success" type="submit">Save</button>
-                                <a href="{{route('closePosition',$order->id)}}" class="btn btn-danger"
-                                   onclick="return confirm('Are you sure?');">Close</a>
-                                <a target="_blank"
-                                   href="https://www.tradingview.com/chart/?symbol=BINANCE%3A{{$order->symbol}}"
-                                   class="btn btn-default">TradingView</a>
+                                <div class="btn-group" role="group" aria-label="Basic example">
+                                    <button type="submit" class="btn btn-success">S</button>
+                                    <a href="{{route('closePosition',$order->id)}}" class="btn btn-danger" onclick="return confirm('Are you sure?');">X</a>
+                                    <a target="_blank" href="https://www.tradingview.com/chart/?symbol=BINANCE%3A{{$order->symbol}}" class="btn btn-secondary">TV</a>
+                                </div>
                             </td>
 
                         </tr>
@@ -131,4 +130,6 @@
 
 
     </script>
+
+
 @endsection
