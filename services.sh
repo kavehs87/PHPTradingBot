@@ -1,27 +1,73 @@
 #!/usr/bin/env bash
 
-i="0"
+if [ $1 = "daemon" ]; then
+    echo "daemon"
+    while sleep 1
+    do
+    PID=$(ps aux | grep 'daemon:price' | grep -v grep | awk '{print $2}')
+    if [[ -z $PID ]]; then
+        php artisan daemon:price &>/dev/null &
+    fi
 
-while sleep 1
-do
-PID=$(ps aux | grep 'daemon:price' | grep -v grep | awk '{print $2}')
-if [[ -z $PID ]]; then
-    php artisan daemon:price &>/dev/null &
+    PID=$(ps aux | grep 'daemon:signals' | grep -v grep | awk '{print $2}')
+    if [[ -z $PID ]]; then
+        php artisan daemon:signals &>/dev/null &
+    fi
+
+    PID=$(ps aux | grep 'daemon:orders' | grep -v grep | awk '{print $2}')
+    if [[ -z $PID ]]; then
+        php artisan daemon:orders &>/dev/null &
+    fi
+
+#    PID=$(ps aux | grep 'ssh -D 1337' | grep -v grep | awk '{print $2}')
+#    if [[ -z $PID ]]; then
+#        ssh -D 1337 -f -C -q -N root@149.28.135.20
+#    fi
+
+    done
+
 fi
 
-PID=$(ps aux | grep 'daemon:signals' | grep -v grep | awk '{print $2}')
-if [[ -z $PID ]]; then
-    php artisan daemon:signals &>/dev/null &
+if [ $1 = "status" ]; then
+    echo "status ..."
+    PID=$(ps aux | grep 'daemon:price' | grep -v grep | awk '{print $2}')
+    if [[ -z $PID ]]; then
+        echo "Price Daemon Stopped"
+        else
+        echo "Price Daemon Running"
+    fi
+
+    PID=$(ps aux | grep 'daemon:signals' | grep -v grep | awk '{print $2}')
+    if [[ -z $PID ]]; then
+        echo "Signals Daemon Stopped"
+        else
+        echo "Signals Daemon Running"
+    fi
+
+    PID=$(ps aux | grep 'daemon:orders' | grep -v grep | awk '{print $2}')
+    if [[ -z $PID ]]; then
+        echo "Orders Daemon Stopped"
+        else
+        echo "Orders Daemon Running"
+    fi
+
+    PID=$(ps aux | grep 'ssh -D 1337' | grep -v grep | awk '{print $2}')
+    if [[ -z $PID ]]; then
+        echo "Tunnel Daemon Stopped"
+        else
+        echo "Tunnel Daemon Running"
+    fi
+
 fi
 
-PID=$(ps aux | grep 'daemon:orders' | grep -v grep | awk '{print $2}')
-if [[ -z $PID ]]; then
-    php artisan daemon:orders &>/dev/null &
+if [ $1 = "restart" ]; then
+    pkill -f "php artisan daemon:"
+    echo "restarted"
 fi
 
-#PID=$(ps aux | grep 'ssh -D 1337' | grep -v grep | awk '{print $2}')
-#if [[ -z $PID ]]; then
-#    ssh -D 1337 -f -C -q -N root@46.4.153.191
-#fi
+if [ $1 = "stop" ]; then
+    pkill -f "php artisan daemon:"
+    pkill -f "services.sh"
+    echo "stopped"
+fi
 
-done

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class Prices extends Command
 {
-    protected $sleepInterval = 10;
+    protected $sleepInterval = 5;
     /**
      * The name and signature of the console command.
      *

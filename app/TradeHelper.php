@@ -21,9 +21,18 @@ class TradeHelper
         return (($current - $buy) * 100) / $current;
     }
 
+    public static function maxPercent($current, $max, $buyPrice)
+    {
+        $_temp = $max /100;
+        $maxPrice = ($buyPrice * $_temp) + $buyPrice;
+        return round(self::getPercent($maxPrice, $current), 2);
+
+//        return (($current - ($buy + ($buy * $max))) * 100) / ($buy + ($buy * $max));
+    }
+
     public static function market2symbol($market)
     {
-        if (strpos($market,'-') === false){
+        if (strpos($market, '-') === false) {
             return $market;
         }
         $parts = explode('-', $market);

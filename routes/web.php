@@ -17,6 +17,7 @@ Route::get('/system', 'HomeController@system')->name('system');
 Route::get('/events', 'HomeController@events')->name('events');
 Route::get('/history', 'HomeController@history')->name('history');
 Route::get('/positions', 'HomeController@positions')->name('positions');
+Route::get('/positions/toggleTrailing/{id}', 'HomeController@toggleTrailing')->name('toggleTrailing');
 Route::get('/positions/close/{id}', 'HomeController@closePosition')->name('closePosition');
 Route::get('/positions/new/{market}/{quantity}', 'HomeController@newPosition')->name('newPosition');
 Route::post('/positions/edit/{id}', 'HomeController@editPosition')->name('editPosition');
@@ -46,5 +47,12 @@ try {
 
 
 Route::get('/debug', function () {
-    dd(\App\Modules::getModules());
+//    dd(\App\Modules::getModules());
+
+    $order = \App\Order::find(979);
+    $order->trailing = true;
+    $order->save();
+
+    dd($order->toArray());
+
 });

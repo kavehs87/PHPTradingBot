@@ -82,11 +82,9 @@ class ProfitClone extends Modules
             <tr>
                 <td>Symbol</td>
                 <td>Buy</td>
-                <td>Sell</td>
                 <td>P/L</td>
                 <td>Qty</td>
-                <td>TimeFrame</td>
-                <td>time</td>
+                <td>duration</td>
                 <th>TP</th>
                 <th>SL</th>
                 <th>TTP</th>
@@ -102,7 +100,6 @@ class ProfitClone extends Modules
                 <tr>
                     <td>' . $order->symbol . '</td>
                     <td>' . $order->price . '</td>
-                    <td>' . $order->sellOrder->price . '</td>
                     <td class="';
                 if ($order->getPL(true) > 0) {
                     $return .= 'bg-success';
@@ -114,7 +111,6 @@ class ProfitClone extends Modules
                     </td>
                     <td>' . $order->origQty . '</td>
                     <td>' . $order->getTimeFrame() . '</td>
-                    <td>' . $order->sellOrder->created_at->diffForHumans() . '</td>
                     <td>' . $order->takeProfit . '%</td>
                     <td>' . $order->stopLoss . '%</td>
                     <td>' . $order->trailingTakeProfit . '%</td>
@@ -146,7 +142,11 @@ class ProfitClone extends Modules
             $orders[] = Order::find($clone);
         }
 
-        return $orders;
+        $positions = collect($orders);
+
+        return $positions->sortByDesc(function ($a) {
+            return $a->created_at;
+        });
     }
 
     protected function addReBuyCount($order)

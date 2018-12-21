@@ -80,10 +80,13 @@ class HomeController extends Controller
     public function positions()
     {
         $open = Order::getOpenPositions();
+        $count = count(Order::getOpenPositions(true));
+
         $prices = Cache::get('prices');
         return view('positions', [
             'open' => $open,
-            'prices' => json_decode($prices, true)
+            'prices' => json_decode($prices, true),
+            'allCount' => $count
         ]);
     }
 
@@ -198,4 +201,12 @@ class HomeController extends Controller
         return redirect()->back();
     }
 
+
+    public function toggleTrailing($id)
+    {
+        $order = Order::find($id);
+        $order->trailing = !$order->trailing;
+        $order->save();
+        return redirect()->back();
+    }
 }

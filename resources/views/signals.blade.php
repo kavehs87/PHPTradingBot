@@ -24,6 +24,11 @@
                             Buy
                         </a>
                     </td>
+                    <td>
+                        <a target="_blank"
+                           href="https://www.tradingview.com/chart/?symbol=BINANCE%3A{{\App\TradeHelper::market2symbol($signal->market)}}"
+                           class="btn btn-default">TradingView</a>
+                    </td>
                 </tr>
             @endforeach
             </tbody>

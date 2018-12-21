@@ -8,6 +8,7 @@
             <thead>
             <tr>
                 <td>Symbol</td>
+                <td>date</td>
                 <td>Buy</td>
                 <td>Sell</td>
                 <td>P/L</td>
@@ -19,6 +20,7 @@
                 <th>TTP</th>
                 <th>TSL</th>
                 <th>max</th>
+                <th>Comments</th>
                 <th></th>
             </tr>
             </thead>
@@ -26,6 +28,7 @@
             @foreach($all as  $order)
                 <tr>
                     <td>{{$order->symbol}}</td>
+                    <td>{{$order->created_at->diffForHumans()}}</td>
                     <td>{{$order->price}}</td>
                     <td>
                         @if(isset($order->sellOrder) && !empty($order->sellOrder))
@@ -48,6 +51,7 @@
                     <td>{{$order->trailingTakeProfit}}%</td>
                     <td>{{$order->trailingStopLoss}}%</td>
                     <td>{{$order->maxFloated}}</td>
+                    <td>{{$order->sellOrder->comment}}</td>
                     <td>
                         <a target="_blank" href="https://www.tradingview.com/chart/?symbol=BINANCE%3A{{$order->symbol}}"
                            class="btn btn-default">TradingView</a>

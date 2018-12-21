@@ -20,7 +20,7 @@ class CapitalExchanger extends Modules
         return [
             [
                 'route' => 'capitalExchanger',
-                'text' => 'Capital Exchanger',
+                'text' => 'Capital Mover',
                 'module' => 'CapitalExchanger'
             ]
         ];
@@ -28,6 +28,7 @@ class CapitalExchanger extends Modules
 
     public function CapitalExchangerPage()
     {
-        
+        view()->addNamespace('capitalExchanger', app_path('Modules/capitalExchanger/view'));
+        return view('capitalExchanger::layout');
     }
 }

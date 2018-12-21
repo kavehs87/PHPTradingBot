@@ -37,7 +37,8 @@ class Signal extends Model
                 }
 
 
-                Order::buy($symbol,100);
+                Order::buy($symbol,100,'from_signal');
+
             }
             Mail::to('kaveh.s@live.com')->send(new SignalReceived($model));
         });

@@ -34,7 +34,9 @@ use Illuminate\Support\Facades\Cache;
  * @property int trailingTakeProfit
  * @property float trailingStopLoss
  * @property mixed maxFloated
+ * @property mixed minFloated
  * @property bool trailing
+ * @property null comment
  */
 class Order extends Model
 {
@@ -44,10 +46,11 @@ class Order extends Model
     /**
      * @param $symbol
      * @param $quantity
+     * @param null $comment
      * @return bool
      * @throws \Exception
      */
-    public static function buy($symbol, $quantity)
+    public static function buy($symbol, $quantity, $comment = null)
     {
         $orderDefaults = Setting::getValue('orderDefaults');
 
@@ -95,6 +98,9 @@ class Order extends Model
         $order->stopLoss = isset($orderDefaults['sl']) ? $orderDefaults['sl'] : 2;
         $order->trailingTakeProfit = isset($orderDefaults['ttp']) ? $orderDefaults['ttp'] : 1;
         $order->trailingStopLoss = isset($orderDefaults['tsl']) ? $orderDefaults['tsl'] : 0.5;
+        if ($comment) {
+            $order->comment = $comment;
+        }
 
         $order->save();
 
@@ -114,10 +120,11 @@ class Order extends Model
      * @param $symbol
      * @param $quantity
      * @param $buyId
+     * @param null $comment
      * @return bool
      * @throws \Exception
      */
-    public static function sell($symbol, $quantity, $buyId)
+    public static function sell($symbol, $quantity, $buyId, $comment = null)
     {
         /*
          * Module before Hook
@@ -160,6 +167,9 @@ class Order extends Model
         $order->type = $type;
         $order->side = $side;
         $order->buyId = $buyId;
+        if ($comment) {
+            $order->comment = $comment;
+        }
 
         $order->save();
 
@@ -179,7 +189,7 @@ class Order extends Model
         $since = Carbon::now()->subDays(30);
 
         $orders = Order::where('created_at', '>', $since)
-            ->where('side','BUY')
+            ->where('side', 'BUY')
             ->whereDoesntHave('sellOrder')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -247,7 +257,7 @@ class Order extends Model
     {
         $since = Carbon::now()->subDays(30);
         $orders = Order::where('created_at', '>', $since)
-            ->where('side','BUY')
+            ->where('side', 'BUY')
             ->whereHas('sellOrder')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -279,6 +289,17 @@ class Order extends Model
             $this->save();
         }
 
+        /*
+         * update the minFloated
+         */
+        if ($this->trailing && $pl < 0) {
+            if ($pl > $this->minFloated) {
+                $this->minFloated = $pl;
+                $this->save();
+
+            }
+        }
+
 
         /*
          * updates the isTrailing
@@ -298,6 +319,7 @@ class Order extends Model
                 // loss
                 if (abs($this->getPL()) > $this->stopLoss) {
                     $this->trailing = true;
+                    $this->minFloated = $this->getPL();
                     $this->save();
 //                    Event::create([
 //                        'type' => 'info',
@@ -309,22 +331,26 @@ class Order extends Model
          * watch for trailing P/L
          */
         else {
-            $diff = $this->maxFloated - $this->getPL();
+
             if ($this->inProfit()) {
+                $diff = $this->maxFloated - $this->getPL();
                 // profit
                 if ($diff > $this->trailingTakeProfit) {
-                    self::sell($this->symbol, $this->origQty, $this->id);
+                    self::sell($this->symbol, $this->origQty, $this->id, 'TTP');
                 }
             } else {
                 // loss
-                if ($this->maxFloated >= 0) {
-                    //just got reversed to loss from profit
+//                if ($this->maxFloated >= 0) {
+//                    $this->trailing = false;
+//                    $this->minFloated = 0;
+                //just got reversed to loss from profit
 //                    $this->maxFloated = $this->getPL();
 //                    $this->save();
+//                } else {
+                if (($this->minFloated - $this->trailingStopLoss) > $this->getPL()) {
+                    self::sell($this->symbol, $this->origQty, $this->id, 'TSL');
                 }
-                if ($diff > $this->trailingStopLoss) {
-                    self::sell($this->symbol, $this->origQty, $this->id);
-                }
+//                }
             }
 
         }
