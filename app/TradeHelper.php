@@ -23,7 +23,7 @@ class TradeHelper
 
     public static function maxPercent($current, $max, $buyPrice)
     {
-        $_temp = $max /100;
+        $_temp = $max / 100;
         $maxPrice = ($buyPrice * $_temp) + $buyPrice;
         return round(self::getPercent($maxPrice, $current), 2);
 
@@ -37,6 +37,15 @@ class TradeHelper
         }
         $parts = explode('-', $market);
         return $parts[1] . $parts[0];
+    }
+
+
+    public static function getRIO(Order $order)
+    {
+        $pl = $order->getPL(true);
+        $quantity = $order->origQty;
+
+        return $quantity * $pl / 100;
     }
 
 }

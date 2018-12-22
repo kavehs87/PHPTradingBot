@@ -12,13 +12,16 @@
             </div>
             <div class="card-body">
                 <p>
-                    Total successful trades :
+                    Total successful trades : {{$profitCount}}
                 </p>
                 <p>
-                    Total Percentage :
+                    Total USDT : {{$totalProfit}}
                 </p>
                 <p>
-                    Highest profit :
+                    Total Percentage : {{$totalProfitPercent}}
+                </p>
+                <p>
+                    Highest profit : {{$highestProfit->symbol ?? 'N/A'}} : {{$highestProfit ? $highestProfit->getPL(true) : '-'}}
                 </p>
             </div>
         </div>
@@ -31,13 +34,16 @@
             </div>
             <div class="card-body">
                 <p>
-                    Total failed trades :
+                    Total failed trades : {{$lossCount}}
                 </p>
                 <p>
-                    Total Percentage :
+                    Total USDT : {{$totalLoss}}
                 </p>
                 <p>
-                    Highest loss :
+                    Total Percentage : {{$totalLossPercent}}
+                </p>
+                <p>
+                    Highest loss :{{$highestLoss->symbol ?? 'N/A'}} : {{$highestLoss ? $highestLoss->getPL(true) : '-'}}
                 </p>
             </div>
         </div>
@@ -53,7 +59,7 @@
                     Overall Performance :
                 </p>
                 <p>
-                    #1 Symbol :
+                    Day Income : {{round($totalProfit - abs($totalLoss),3)}} USDT
                 </p>
                 <p>
 

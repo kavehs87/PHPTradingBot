@@ -31,7 +31,7 @@
                 Save
             </button>
             <button onclick="cancelEdit()" class="btn btn-primary" id="savePositionBtn">
-                Cancel Edit
+                Cancel/New
             </button>
         @else
             <button onclick="openPosition()" class="btn btn-primary">
@@ -91,26 +91,7 @@
             autoFill: true,
             select: function (event, ui) {   //must be cleared with function parameter
                 var pair = ui.item.label;
-                new TradingView.widget(
-                    {
-                        "autosize": true,
-                        "symbol": "BINANCE:" + pair,
-                        "interval": "5",
-                        "timezone": "Etc/UTC",
-                        "theme": "Dark",
-                        "style": "1",
-                        "locale": "en",
-                        "toolbar_bg": "#f1f3f6",
-                        "enable_publishing": true,
-                        "hide_side_toolbar": false,
-                        "allow_symbol_change": true,
-                        "details": true,
-                        "studies": [
-                            "MACD@tv-basicstudies"
-                        ],
-                        "container_id": "tradingview_b42a6"
-                    }
-                );
+                openTV(pair);
             }
         });
     });

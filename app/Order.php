@@ -51,7 +51,7 @@ class Order extends Model
      * @return bool
      * @throws \Exception
      */
-    public static function buy($symbol, $quantity, $comment = null, $options)
+    public static function buy($symbol, $quantity, $comment = null, $options = [])
     {
         $orderDefaults = Setting::getValue('orderDefaults');
 

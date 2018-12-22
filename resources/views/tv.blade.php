@@ -5,8 +5,8 @@
 
     #tradingview_b42a6 {
         width: 100%;
-        min-height: 450px;
-        height: 450px;
+        min-height: 600px;
+        height: 600px;
     }
 </style>
 
@@ -30,7 +30,7 @@
                 {
                     "autosize": true,
                     "symbol": "BINANCE:" + symbol,
-                    "interval": "5",
+                    "interval": "60",
                     "timezone": "Etc/UTC",
                     "theme": "Dark",
                     "style": "1",
@@ -41,6 +41,8 @@
                     "allow_symbol_change": false,
                     "details": true,
                     "studies": [
+                        "MACD@tv-basicstudies",
+                        "RSI@tv-basicstudies"
                     ],
                     "container_id": "tradingview_b42a6"
                 }

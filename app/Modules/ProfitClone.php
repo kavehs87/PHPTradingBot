@@ -95,18 +95,19 @@ class ProfitClone extends Modules
             </thead>
             <tbody>';
 
-            foreach ($this->positions() as $order) {
-                $return .= '
+            if (!empty($this->positions())) {
+                foreach ($this->positions() as $order) {
+                    $return .= '
                 <tr>
                     <td>' . $order->symbol . '</td>
                     <td>' . $order->price . '</td>
                     <td class="';
-                if ($order->getPL(true) > 0) {
-                    $return .= 'bg-success';
-                } else {
-                    $return .= 'bg-danger';
-                }
-                $return .= '">
+                    if ($order->getPL(true) > 0) {
+                        $return .= 'bg-success';
+                    } else {
+                        $return .= 'bg-danger';
+                    }
+                    $return .= '">
                         ' . round($order->getPL(true), 3) . '%
                     </td>
                     <td>' . $order->origQty . '</td>
@@ -121,8 +122,8 @@ class ProfitClone extends Modules
                     </td>
 
                 </tr>';
+                }
             }
-
             $return .= '</tbody>
         </table>';
         }
@@ -145,7 +146,10 @@ class ProfitClone extends Modules
         $positions = collect($orders);
 
         return $positions->sortByDesc(function ($a) {
-            return $a->created_at;
+            if (isset($a->created_at)) {
+                return $a->created_at;
+            }
+            return false;
         });
     }
 
