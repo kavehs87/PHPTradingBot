@@ -20,6 +20,7 @@
                 <th>TTP</th>
                 <th>TSL</th>
                 <th>max</th>
+                <th>min</th>
                 <th>Comments</th>
                 <th></th>
             </tr>
@@ -51,6 +52,7 @@
                     <td>{{$order->trailingTakeProfit}}%</td>
                     <td>{{$order->trailingStopLoss}}%</td>
                     <td>{{$order->maxFloated}}</td>
+                    <td>{{$order->minFloated}}</td>
                     <td>{{$order->sellOrder->comment}}</td>
                     <td>
                         <a target="_blank" href="https://www.tradingview.com/chart/?symbol=BINANCE%3A{{$order->symbol}}"

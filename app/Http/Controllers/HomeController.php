@@ -39,13 +39,13 @@ class HomeController extends Controller
         $miningHamster = Setting::getValue('miningHamster');
 
         $binanceConfig = Setting::getValue('binance');
-        if ($binanceConfig){
+        if ($binanceConfig) {
             if (Cache::get('balances')) {
                 $balances = json_decode(Cache::get('balances'), true);
             } else {
 
                 $binance = new \Binance\API($binanceConfig['api'], $binanceConfig['secret']);
-                if (isset($binanceConfig['proxyEnabled']) && $binanceConfig['proxyEnabled'] != false){
+                if (isset($binanceConfig['proxyEnabled']) && $binanceConfig['proxyEnabled'] != false) {
                     $binance->setProxy([
                         'proto' => $binanceConfig['proxy']['proto'],
                         'address' => $binanceConfig['proxy']['host'],
@@ -65,7 +65,6 @@ class HomeController extends Controller
         }
 
 
-
         $lastPrices = Cache::get('prices');
         $signal = Cache::get('signal');
         return view('system', [
@@ -77,24 +76,45 @@ class HomeController extends Controller
         ]);
     }
 
-    public function positions()
+    public function positions($id = null)
     {
         $open = Order::getOpenPositions();
         $count = count(Order::getOpenPositions(true));
 
         $prices = Cache::get('prices');
+        $order = null;
+        if ($id){
+            $order = Order::find($id);
+        }
+
         return view('positions', [
+            'open' => $open,
+            'prices' => json_decode($prices, true),
+            'allCount' => $count,
+            'order' => $order
+        ]);
+    }
+
+    public function openTable()
+    {
+        $open = Order::getOpenPositions();
+        $count = count(Order::getOpenPositions(true));
+
+        $prices = Cache::get('prices');
+        $html = view('openTable', [
             'open' => $open,
             'prices' => json_decode($prices, true),
             'allCount' => $count
         ]);
+
+        return $html;
     }
 
     public function history()
     {
         $since = Carbon::now()->subDays(30);
         $orders = Order::where('created_at', '>', $since)
-            ->where('side','BUY')
+            ->where('side', 'BUY')
             ->whereHas('sellOrder')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
@@ -137,10 +157,21 @@ class HomeController extends Controller
         return redirect()->back()->with('success', 'position modified.');
     }
 
-    public function newPosition($market, $quantity)
+    public function newPosition($market, $quantity, $tp = 0, $sl = 0, $ttp = 0, $tsl = 0)
     {
+        $options = [];
+        if ($tp != 0 && $sl != 0 && $ttp != 0 && $tsl != 0) {
+            $options = [
+                'tp' => $tp,
+                'sl' => $sl,
+                'ttp' => $ttp,
+                'tsl' => $tsl
+            ];
+        }
         $symbol = TradeHelper::market2symbol($market);
-        Order::buy($symbol, $quantity);
+        $buyId = Order::buy($symbol, $quantity, '', $options);
+
+
         return redirect(route('positions'))->with('success', 'position opened.');
     }
 
@@ -182,11 +213,11 @@ class HomeController extends Controller
         $miningHamster = $request->get('miningHamster');
 
 
-        if ($binance){
-            Setting::setValue('binance',$binance);
+        if ($binance) {
+            Setting::setValue('binance', $binance);
         }
-        if ($miningHamster){
-            Setting::setValue('miningHamster',$miningHamster);
+        if ($miningHamster) {
+            Setting::setValue('miningHamster', $miningHamster);
         }
 
 
@@ -196,7 +227,7 @@ class HomeController extends Controller
     public function saveOrderDefaults(Request $request)
     {
         $data = $request->except('_token');
-        Setting::setValue('orderDefaults',$data['orderDefaults']);
+        Setting::setValue('orderDefaults', $data['orderDefaults']);
 
         return redirect()->back();
     }
@@ -209,4 +240,17 @@ class HomeController extends Controller
         $order->save();
         return redirect()->back();
     }
+
+    public function savePosition(Request $request)
+    {
+        $order = Order::find($request->get('id'));
+        $order->takeProfit = $request->get('tp');
+        $order->stopLoss = $request->get('sl');
+        $order->trailingTakeProfit = $request->get('ttp');
+        $order->trailingStopLoss = $request->get('tsl');
+        $order->save();
+        return response('success',200);
+    }
+
+
 }

@@ -47,10 +47,11 @@ class Order extends Model
      * @param $symbol
      * @param $quantity
      * @param null $comment
+     * @param $options
      * @return bool
      * @throws \Exception
      */
-    public static function buy($symbol, $quantity, $comment = null)
+    public static function buy($symbol, $quantity, $comment = null, $options)
     {
         $orderDefaults = Setting::getValue('orderDefaults');
 
@@ -98,6 +99,14 @@ class Order extends Model
         $order->stopLoss = isset($orderDefaults['sl']) ? $orderDefaults['sl'] : 2;
         $order->trailingTakeProfit = isset($orderDefaults['ttp']) ? $orderDefaults['ttp'] : 1;
         $order->trailingStopLoss = isset($orderDefaults['tsl']) ? $orderDefaults['tsl'] : 0.5;
+
+        if (!empty($options)){
+            $order->takeProfit = $options['tp'];
+            $order->stopLoss = $options['sl'];
+            $order->trailingTakeProfit = $options['ttp'];
+            $order->trailingStopLoss = $options['tsl'];
+        }
+
         if ($comment) {
             $order->comment = $comment;
         }
