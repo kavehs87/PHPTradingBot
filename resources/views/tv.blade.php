@@ -42,7 +42,8 @@
                     "details": true,
                     "studies": [
                         "MACD@tv-basicstudies",
-                        "RSI@tv-basicstudies"
+                        "RSI@tv-basicstudies",
+                        "BB@tv-basicstudies"
                     ],
                     "container_id": "tradingview_b42a6"
                 }

@@ -1,4 +1,4 @@
-<h2 class="mt-5" style="margin-left: 20px;">Open Orders ({{$allCount}})</h2>
+<h2 style="margin-left: 20px;">Open Orders ({{$allCount}})</h2>
 
 @if($open->isNotEmpty())
     <table class="table table-hover table-responsive col-12">

@@ -2,12 +2,15 @@
 
 @section('body')
 
+
+    <div id="tableContainer"></div>
+
+
     <div class="col-12">
         @include('newPosition')
         @include('tv')
     </div>
 
-    <div id="tableContainer"></div>
 
     <script>
         (function countdown(remaining) {
