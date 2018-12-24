@@ -28,9 +28,9 @@
             if (edit || show) {
                 openTV(symbol);
                 $("#pair").val(symbol);
-            }
-            else {
-                openTV('BTCUSDT');
+                if (symbol == ""){
+                    openTV('BTCUSDT');
+                }
             }
         });
 

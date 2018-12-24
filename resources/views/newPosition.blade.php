@@ -91,7 +91,7 @@
 </script>
 <script>
     $(function () {
-        var availableTags = {!! json_encode(array_keys(json_decode(\Illuminate\Support\Facades\Cache::get('prices'),true))) !!};
+        var availableTags = {!! json_encode(array_keys(json_decode(\Illuminate\Support\Facades\Cache::get('prices'),true) ?? [])) !!};
         $("#pair").autocomplete({
             source: availableTags,
             autoFill: true,

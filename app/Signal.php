@@ -35,12 +35,10 @@ class Signal extends Model
                         $module->getFactory()->onSignalReceived($model);
                     }
                 }
-
-
-                Order::buy($symbol,10,'from_signal');
-
+                Order::buy($symbol,10,'',[
+                    'signal_id' => $model->signalID
+                ]);
             }
-            Mail::to('kaveh.s@live.com')->send(new SignalReceived($model));
         });
     }
 }

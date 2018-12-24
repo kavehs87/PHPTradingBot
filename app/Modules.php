@@ -237,6 +237,11 @@ class Modules extends Model
         return [];
     }
 
+    public function signalLoop()
+    {
+        
+    }
+
 
 
 }

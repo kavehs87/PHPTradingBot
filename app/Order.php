@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\Cache;
  * @property mixed minFloated
  * @property bool trailing
  * @property null comment
+ * @property null signal_id
  */
 class Order extends Model
 {
@@ -100,11 +101,17 @@ class Order extends Model
         $order->trailingTakeProfit = isset($orderDefaults['ttp']) ? $orderDefaults['ttp'] : 1;
         $order->trailingStopLoss = isset($orderDefaults['tsl']) ? $orderDefaults['tsl'] : 0.5;
 
-        if (!empty($options)){
-            $order->takeProfit = $options['tp'];
-            $order->stopLoss = $options['sl'];
-            $order->trailingTakeProfit = $options['ttp'];
-            $order->trailingStopLoss = $options['tsl'];
+        if (!empty($options)) {
+            if (isset($options['tp']))
+                $order->takeProfit = $options['tp'];
+            if (isset($options['sl']))
+                $order->stopLoss = $options['sl'];
+            if (isset($options['ttp']))
+                $order->trailingTakeProfit = $options['ttp'];
+            if (isset($options['tsl']))
+                $order->trailingStopLoss = $options['tsl'];
+            if (isset($options['signal_id']))
+                $order->signal_id = $options['signal_id'];
         }
 
         if ($comment) {
@@ -212,6 +219,11 @@ class Order extends Model
     public function sellOrder()
     {
         return $this->belongsTo(Order::class, 'id', 'buyId');
+    }
+
+    public function signal()
+    {
+        return $this->belongsTo(Signal::class, 'signal_id', 'signalID');
     }
 
     public function isOpen()

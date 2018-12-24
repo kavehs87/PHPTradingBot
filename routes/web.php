@@ -58,6 +58,9 @@ Route::get('/debug', function () {
 //
 //    dd($order->toArray());
 
-    dd(\App\TradeHelper::recentlyTradedPairs(\Carbon\Carbon::now()->subDays(1)));
+//    dd(\App\TradeHelper::recentlyTradedPairs(\Carbon\Carbon::now()->subDays(1)));
+
+//    dd(\App\Signal::where('id','!=',12121212)->delete());
+//    dd(\App\Order::find(2)->signal);
 
 });

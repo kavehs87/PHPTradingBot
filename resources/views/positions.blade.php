@@ -28,6 +28,8 @@
                 axios.get('/positions/table/open').then(function (response) {
                     $("#tableContainer").html(response.data);
                     remaining = 5;
+                }).then(function (error) {
+                    console.log(error);
                 });
             }
             setTimeout(function () {

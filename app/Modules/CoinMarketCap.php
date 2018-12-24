@@ -44,16 +44,15 @@ class CoinMarketCap extends Modules
 
     public function loadCoinMarketCap()
     {
-        $binance_pairs = array_keys(json_decode(Cache::get('prices'), true));
+        $binance_pairs = array_keys(json_decode(Cache::get('prices'), true) ?? []);
 
         libxml_use_internal_errors(true);
 
-        if (!Cache::has('cmk')){
+        if (!Cache::has('cmk')) {
             $url = 'https://coinmarketcap.com/coins/views/all/';
             $content = file_get_contents($url);
-            Cache::put('cmk',$content,Carbon::now()->addMinutes(5));
-        }
-        else {
+            Cache::put('cmk', $content, Carbon::now()->addMinutes(5));
+        } else {
             $content = Cache::get('cmk');
         }
 
@@ -61,16 +60,20 @@ class CoinMarketCap extends Modules
         $dom->loadHTML($content);
 
         $allCoinsTable = $dom->getElementById('currencies-all');
-        $tbody = $dom->getElementsByTagName('tbody');
+        $tbody = $allCoinsTable->getElementsByTagName('tbody');
         $r = 1;
         $row = [];
         foreach ($tbody->item(0)->childNodes as $tr) {
-            $tds = $tr->getElementsByTagName('td');
-            $coin = trim($tds->item(2)->nodeValue) . 'BTC';
-            for ($i = 0; $i < $tds->length; $i++) {
-                if (in_array($coin, $binance_pairs) || $coin == 'BTCBTC') {
-                    if ($i != 10){
-                        $row[$r][] = trim($tds->item($i)->nodeValue);
+
+            $nodeType = $tr->nodeType;
+            if ($nodeType == 1) {
+                $tds = $tr->getElementsByTagName('td');
+                $coin = trim($tds->item(2)->nodeValue) . 'BTC';
+                for ($i = 0; $i < $tds->length; $i++) {
+                    if (in_array($coin, $binance_pairs) || $coin == 'BTCBTC') {
+                        if ($i != 10) {
+                            $row[$r][] = trim($tds->item($i)->nodeValue);
+                        }
                     }
                 }
             }

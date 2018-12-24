@@ -37,8 +37,6 @@ class HomeController extends Controller
     {
 
         $balances = [];
-        $miningHamster = Setting::getValue('miningHamster');
-
         $binanceConfig = Setting::getValue('binance');
         if ($binanceConfig) {
             if (Cache::get('balances')) {
@@ -67,13 +65,10 @@ class HomeController extends Controller
 
 
         $lastPrices = Cache::get('prices');
-        $signal = Cache::get('signal');
         return view('system', [
             'lastPrices' => json_decode($lastPrices, true),
-            'signal' => json_decode($signal, true),
             'balances' => $balances,
             'binanceConfig' => $binanceConfig,
-            'miningHamster' => $miningHamster
         ]);
     }
 

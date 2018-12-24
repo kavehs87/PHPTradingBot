@@ -19,6 +19,7 @@
             <th>TTP</th>
             <th>TSL</th>
             <th>note</th>
+            <th>risk</th>
             <th>max</th>
             <th>min</th>
             <th>
@@ -50,7 +51,8 @@
                             @if($order->trailing)
                                 <a href="{{route('toggleTrailing',$order->id)}}" class="btn btn-secondary">Yes</a>
                             @else
-                                <a href="{{route('toggleTrailing',$order->id)}}" class="btn btn-outline-secondary">No</a>
+                                <a href="{{route('toggleTrailing',$order->id)}}"
+                                   class="btn btn-outline-secondary">No</a>
                             @endif
                         </td>
                         {{--<td><input type="text" size="2" value="{{$order->takeProfit}}" name="takeProfit">%</td>--}}
@@ -63,12 +65,18 @@
                         <td>
                             {{$order->comment}}
                         </td>
+                        <td>
+                            @if($order->signal)
+                                {{$order->signal->rl}}
+                            @endif
+                        </td>
                         <td>{{$order->maxFloated}}</td>
                         <td>{{$order->minFloated}}</td>
                         <td>
                             <div class="btn-group" role="group" aria-label="Basic example">
                                 <a href="{{route('positions',$order->id)}}" class="btn btn-success">Edit</a>
-                                <a href="{{route('closePosition',$order->id)}}" class="btn btn-danger" onclick="return confirm('Are you sure?');">Close</a>
+                                <a href="{{route('closePosition',$order->id)}}" class="btn btn-danger"
+                                   onclick="return confirm('Are you sure?');">Close</a>
                                 <button onclick="openTV('{{$order->symbol}}')" class="btn btn-secondary">TV</button>
                             </div>
                         </td>

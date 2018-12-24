@@ -20,7 +20,7 @@ class Orders extends Command
      * @var string
      */
     protected $description = 'Process Orders';
-    private $sleepInterval = 10;
+    private $sleepInterval = 2;
 
     /**
      * Create a new command instance.

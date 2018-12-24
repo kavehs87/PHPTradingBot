@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Modules;
 use App\Setting;
 use App\Signal;
 use Carbon\Carbon;
@@ -42,31 +43,55 @@ class Signals extends Command
      */
     public function handle()
     {
-        $miningHamster = Setting::getValue('miningHamster');
-        if (isset($miningHamster['api'])) {
-            $apikey = $miningHamster['api'];
-        } else {
-            return -1;
-        }
-
+//
+//        $miningHamster = Setting::getValue('miningHamster');
+//        if (isset($miningHamster['api'])) {
+//            $apikey = $miningHamster['api'];
+//        } else {
+//            return -1;
+//        }
+//
         while (true) {
-            $uri = "https://www.mininghamster.com/api/v2/$apikey";
-            $sign = hash_hmac('sha512', $uri, $apikey);
-            $ch = curl_init($uri);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('apisign:' . $sign));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $execResult = curl_exec($ch);
-            $obj = json_decode($execResult);
-            if ($obj) {
-                foreach ($obj as $signal) {
-                    Signal::firstOrCreate([
-                        'market' => $signal->market,
-                        'lastprice' => $signal->lastprice,
-                        'signalmode' => $signal->signalmode
-                    ], (array)$signal);
+
+            $activeModules = Modules::getActiveModules();
+            if ($activeModules) {
+                foreach ($activeModules as $module) {
+                    if (method_exists($module->getFactory(), 'signalLoop')) {
+                        $module->getFactory()->signalLoop();
+                    }
                 }
-                Cache::put('signal', json_encode($obj), Carbon::now()->addSeconds(10));
             }
+
+
+//            $uri = "https://www.mininghamster.com/api/v2/$apikey";
+//            $sign = hash_hmac('sha512', $uri, $apikey);
+//            $ch = curl_init($uri);
+//            curl_setopt($ch, CURLOPT_HTTPHEADER, array('apisign:' . $sign));
+//            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+//            $execResult = curl_exec($ch);
+//            $obj = json_decode($execResult);
+//            if ($obj) {
+//                foreach ($obj as $signal) {
+//                    Signal::firstOrCreate([
+//                        'market' => $signal->market,
+//                        'lastprice' => $signal->lastprice,
+//                        'signalmode' => $signal->signalmode
+//                    ], (array)$signal);
+//                }
+//                Cache::put('signal', json_encode($obj), Carbon::now()->addSeconds(10));
+//            }
+//
+//
+//            /**
+//             * Risk Level
+//             */
+//
+//            $urlRL = "https://www.mininghamster.com/api/v2/risklevel/ticker";
+//            $riskLevelRawContent = file_get_contents($urlRL);
+//            $riskLevels = json_decode($riskLevelRawContent);
+//            Cache::put('riskLevels', $riskLevels, Carbon::now()->addMinutes(5));
+//
+
             sleep($this->sleepInterval);
         }
         return 0;
