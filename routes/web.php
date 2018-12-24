@@ -17,6 +17,7 @@ Route::get('/system', 'HomeController@system')->name('system');
 Route::get('/events', 'HomeController@events')->name('events');
 Route::get('/history', 'HomeController@history')->name('history');
 Route::get('/positions/{id?}', 'HomeController@positions')->name('positions');
+Route::get('/positions/{id?}/show', 'HomeController@positions')->name('showSymbol');
 Route::get('/positions/toggleTrailing/{id}', 'HomeController@toggleTrailing')->name('toggleTrailing');
 Route::get('/positions/close/{id}', 'HomeController@closePosition')->name('closePosition');
 Route::get('/positions/new/{market}/{quantity}/{tp?}/{sl?}/{ttp?}/{tsl?}', 'HomeController@newPosition')->name('newPosition');
@@ -51,10 +52,12 @@ try {
 Route::get('/debug', function () {
 //    dd(\App\Modules::getModules());
 
-    $order = \App\Order::find(979);
-    $order->trailing = true;
-    $order->save();
+//    $order = \App\Order::find(979);
+//    $order->trailing = true;
+//    $order->save();
+//
+//    dd($order->toArray());
 
-    dd($order->toArray());
+    dd(\App\TradeHelper::recentlyTradedPairs(\Carbon\Carbon::now()->subDays(1)));
 
 });

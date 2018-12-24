@@ -62,7 +62,10 @@
                     Day Income : {{round($totalProfit - abs($totalLoss),3)}} USDT
                 </p>
                 <p>
-
+                    Total Money Used : {{$totalMoneyUsed}} USDT
+                </p>
+                <p>
+                    binance fee : {{$totalMoneyUsed - \App\TradeHelper::calcPercent($totalMoneyUsed,0.2)}} USDT
                 </p>
             </div>
         </div>

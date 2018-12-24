@@ -30,13 +30,18 @@
             <button onclick="savePosition()" class="btn btn-success" id="savePositionBtn">
                 Save
             </button>
-            <button onclick="cancelEdit()" class="btn btn-primary" id="savePositionBtn">
+            <button onclick="cancelEdit()" class="btn btn-primary">
                 Cancel/New
             </button>
         @else
             <button onclick="openPosition()" class="btn btn-primary">
                 Buy
             </button>
+            @if($show)
+                <button onclick="cancelEdit()" class="btn btn-primary">
+                    Cancel
+                </button>
+            @endif
         @endif
     </div>
 </div>
@@ -47,8 +52,9 @@
         var redirectUrl = "{{route('positions')}}";
         document.location.href = redirectUrl;
     }
+
     function savePosition() {
-        $("#savePositionBtn").attr('disabled','disabled');
+        $("#savePositionBtn").attr('disabled', 'disabled');
         var url = "{{route('savePosition')}}";
         var redirectUrl = "{{route('positions')}}";
         var orderId = "{{isset($order) ? $order->id : ''}}";

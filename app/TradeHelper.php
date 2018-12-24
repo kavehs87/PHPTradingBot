@@ -9,6 +9,9 @@
 namespace App;
 
 
+
+use Carbon\Carbon;
+
 class TradeHelper
 {
     public static function calcPercent($price, $percent)
@@ -46,6 +49,35 @@ class TradeHelper
         $quantity = $order->origQty;
 
         return $quantity * $pl / 100;
+    }
+
+    public static function recentlyTradedPairs(Carbon $time)
+    {
+        $pairs = [];
+        $orders = Order::whereHas('sellOrder')
+            ->where('created_at', '>=', $time)
+            ->get();
+        if ($orders->isEmpty())
+            return false;
+        foreach ($orders as $order) {
+            if (!in_array($order->symbol,$pairs)){
+                $pairs[$order->symbol] = [
+                    'symbol' => $order->symbol,
+                    'avpl' => round($order->getPL(true),3)
+                ];
+            }
+            else {
+                $pairs[$order->symbol] = [
+                    'symbol' => $order->symbol,
+                    'avpl' => round($pairs[$order->symbol]['avpl'] + $order->getPL(true),3)
+                ];
+            }
+        }
+        $collection = collect($pairs);
+        return $collection->sortBy(function($pair)
+        {
+            return $pair['avpl'];
+        });
     }
 
 }

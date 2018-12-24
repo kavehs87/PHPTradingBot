@@ -55,8 +55,7 @@
                     <td>{{$order->minFloated}}</td>
                     <td>{{$order->sellOrder->comment}}</td>
                     <td>
-                        <a target="_blank" href="https://www.tradingview.com/chart/?symbol=BINANCE%3A{{$order->symbol}}"
-                           class="btn btn-default">TradingView</a>
+                        <a href="{{route('positions',$order->id)}}" class="btn btn-secondary">TV</a>
                     </td>
                 </tr>
             @endforeach

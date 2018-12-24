@@ -17,6 +17,7 @@ use App\TradeHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 
 class HomeController extends Controller
 {
@@ -80,18 +81,27 @@ class HomeController extends Controller
     {
         $open = Order::getOpenPositions();
         $count = count(Order::getOpenPositions(true));
-
         $prices = Cache::get('prices');
         $order = null;
-        if ($id){
-            $order = Order::find($id);
+        $showSymbol = false;
+
+        if (Route::currentRouteName() == 'showSymbol'){
+            $showSymbol = true;
         }
+        else {
+            if ($id) {
+                $order = Order::find($id);
+            }
+        }
+
 
         return view('positions', [
             'open' => $open,
             'prices' => json_decode($prices, true),
             'allCount' => $count,
-            'order' => $order
+            'order' => $order,
+            'show' => $showSymbol,
+            'symbol' => $id
         ]);
     }
 
@@ -249,7 +259,7 @@ class HomeController extends Controller
         $order->trailingTakeProfit = $request->get('ttp');
         $order->trailingStopLoss = $request->get('tsl');
         $order->save();
-        return response('success',200);
+        return response('success', 200);
     }
 
 

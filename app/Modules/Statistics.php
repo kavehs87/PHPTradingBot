@@ -31,7 +31,7 @@ class Statistics extends Modules
 
     public function statsPage()
     {
-        $orders = Order::where('created_at', '>=', Carbon::now()->subDay())
+        $orders = Order::where('created_at', '>=', Carbon::now()->subDays(1))
             ->whereHas('sellOrder')
             ->get();
 
@@ -43,6 +43,8 @@ class Statistics extends Modules
         $totalLossPercent = 0;
         $lossCount = 0;
         $highestLoss = null;
+
+        $totalMoneyUsed = 0;
         if ($orders) {
             foreach ($orders as $order) {
                 if ($order->getPL(true) > 0) {
@@ -62,6 +64,8 @@ class Statistics extends Modules
                         $highestLoss = $order;
                     }
                 }
+
+                $totalMoneyUsed += $order->origQty;
             }
         }
 
@@ -78,7 +82,9 @@ class Statistics extends Modules
             'totalProfit' => $totalProfit,
             'totalProfitPercent' => $totalProfitPercent,
             'profitCount' => $profitCount,
-            'highestProfit' => $highestProfit
+            'highestProfit' => $highestProfit,
+
+            'totalMoneyUsed' => $totalMoneyUsed,
         ]);
     }
 }
