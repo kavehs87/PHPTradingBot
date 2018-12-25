@@ -20,14 +20,7 @@
                         </td>
                     @endforeach
                     <td>
-                        <a href="{{route('newPosition',[$signal->market,10])}}" onclick="return confirm('execute a new order?');">
-                            Buy
-                        </a>
-                    </td>
-                    <td>
-                        <a target="_blank"
-                           href="https://www.tradingview.com/chart/?symbol=BINANCE%3A{{\App\TradeHelper::market2symbol($signal->market)}}"
-                           class="btn btn-default">TradingView</a>
+                        <a href="{{route('showSymbol',\App\TradeHelper::market2symbol($signal->market))}}" class="btn btn-secondary">TV</a>
                     </td>
                 </tr>
             @endforeach

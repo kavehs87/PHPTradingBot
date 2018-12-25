@@ -93,7 +93,11 @@ class MiningHamsterSignals extends Modules
         if ($signals) {
             foreach ($signals as $i => $signal) {
                 $signalsWithRiskLevels[$i] = $signal;
-                $signalsWithRiskLevels[$i]['rl'] = $riskLevels[$signal['exchange'] . '-' . $signal['market']]->risklevel;
+                if (isset($riskLevels[$signal['exchange'] . '-' . $signal['market']])) {
+                    $signalsWithRiskLevels[$i]['rl'] = $riskLevels[$signal['exchange'] . '-' . $signal['market']]->risklevel;
+                } else {
+                    $signalsWithRiskLevels[$i]['rl'] = 0;
+                }
             }
         }
         return $signalsWithRiskLevels;

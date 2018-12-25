@@ -48,7 +48,9 @@ class ProfitClone extends Modules
                         $config = $this->getConfig();
                         $config['cloned'][] = $order->id;
                         $this->setConfig($config);
-                        $newOrderId = Order::buy($order->symbol, TradeHelper::calcPercent($order->origQty, $this->getConfig('amountPercent')));
+                        $newOrderId = Order::buy($order->symbol, TradeHelper::calcPercent($order->origQty, $this->getConfig('amountPercent')), 'cloned', [
+                            'signal_id' => $order->signal_id
+                        ]);
                     }
                 }
             }
