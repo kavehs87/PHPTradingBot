@@ -8,19 +8,109 @@
             <thead>
             <tr>
                 <td>Symbol</td>
-                <td>date</td>
-                <td>Buy</td>
-                <td>Sell</td>
-                <td>P/L</td>
-                <td>Qty</td>
-                <td>TimeFrame</td>
-                <td>time</td>
-                <th>TP</th>
-                <th>SL</th>
-                <th>TTP</th>
-                <th>TSL</th>
-                <th>max</th>
-                <th>min</th>
+                <th>
+                    <a href="{{route('sortHistory',['created_at',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        Buy Date
+                        @if($column == 'created_at')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>Buy</th>
+                <th>Sell</th>
+                <th>
+                    <a href="{{route('sortHistory',['pl',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        P/L
+                        @if($column == 'pl')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>
+                    <a href="{{route('sortHistory',['origQty',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        Qty
+                        @if($column == 'origQty')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>TimeFrame</th>
+                <th>
+                    <a href="{{route('sortHistory',['sell_date',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        Sell Date
+                        @if($column == 'sell_date')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>
+                    <a href="{{route('sortHistory',['takeProfit',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        TP
+                        @if($column == 'takeProfit')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>
+                    <a href="{{route('sortHistory',['stopLoss',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        SL
+                        @if($column == 'stopLoss')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>
+                    <a href="{{route('sortHistory',['trailingTakeProfit',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        TTP
+                        @if($column == 'trailingTakeProfit')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>
+                    <a href="{{route('sortHistory',['trailingStopLoss',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        TSL
+                        @if($column == 'trailingStopLoss')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>
+                    <a href="{{route('sortHistory',['maxFloated',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        max
+                        @if($column == 'maxFloated')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
+                <th>
+                    <a href="{{route('sortHistory',['minFloated',$sortType == 'desc' ? 'asc' : 'desc'])}}">
+                        min
+                        @if($column == 'minFloated')
+                            <i>
+                                {{$sortType}}
+                            </i>
+                        @endif
+                    </a>
+                </th>
                 <th>Comments</th>
                 <th></th>
             </tr>
@@ -55,7 +145,7 @@
                     <td>{{$order->minFloated}}</td>
                     <td>{{$order->sellOrder->comment}}</td>
                     <td>
-                        <a href="{{route('positions',$order->id)}}" class="btn btn-secondary">TV</a>
+                        <a href="{{route('showSymbol',$order->symbol)}}" class="btn btn-secondary">TV</a>
                     </td>
                 </tr>
             @endforeach
@@ -67,7 +157,7 @@
         </p>
     @endif
     <div class="col-3 offset-4">
-        {{$all->links()}}
+        {{$orders->links()}}
     </div>
 
 @endsection

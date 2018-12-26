@@ -9,8 +9,8 @@
 namespace App;
 
 
-
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class TradeHelper
 {
@@ -60,24 +60,84 @@ class TradeHelper
         if ($orders->isEmpty())
             return false;
         foreach ($orders as $order) {
-            if (!in_array($order->symbol,$pairs)){
+            if (!in_array($order->symbol, $pairs)) {
                 $pairs[$order->symbol] = [
                     'symbol' => $order->symbol,
-                    'avpl' => round($order->getPL(true),3)
+                    'avpl' => round($order->getPL(true), 3)
                 ];
-            }
-            else {
+            } else {
                 $pairs[$order->symbol] = [
                     'symbol' => $order->symbol,
-                    'avpl' => round($pairs[$order->symbol]['avpl'] + $order->getPL(true),3)
+                    'avpl' => round($pairs[$order->symbol]['avpl'] + $order->getPL(true), 3)
                 ];
             }
         }
         $collection = collect($pairs);
-        return $collection->sortBy(function($pair)
-        {
+        return $collection->sortBy(function ($pair) {
             return $pair['avpl'];
         });
+    }
+
+    public static function getBinance()
+    {
+        $binanceConfig = Setting::getValue('binance');
+        $binance = new \Binance\API($binanceConfig['api'], $binanceConfig['secret']);
+        if (isset($binanceConfig['proxyEnabled']) && $binanceConfig['proxyEnabled'] != false) {
+            $binance->setProxy([
+                'proto' => $binanceConfig['proxy']['proto'],
+                'address' => $binanceConfig['proxy']['host'],
+                'port' => $binanceConfig['proxy']['port'],
+                'username' => $binanceConfig['proxy']['username'],
+                'password' => $binanceConfig['proxy']['password'],
+            ]);
+        }
+        return $binance;
+    }
+
+    public static function calcUSDT($amount, $symbol)
+    {
+        $prices = Cache::get('prices', []);
+        $prices = json_decode($prices, true);
+        if (isset($prices[$symbol . 'USDT'])) {
+            $usdtPrice = $prices[$symbol . 'USDT'];
+        } else {
+            $btcPrice = $prices['BTCUSDT'];
+            $symbol2btc = $prices[$symbol . 'BTC'];
+
+            $usdtPrice = $symbol2btc * $btcPrice;
+        }
+        return $amount / $usdtPrice;
+    }
+
+    public static function getNotions($filter = null)
+    {
+        $notions = [];
+        if (Cache::has('notions')) {
+            $notions = Cache::get('notions');
+        } else {
+            $binance = self::getBinance();
+            $exInfo = $binance->exchangeInfo();
+            foreach ($exInfo['symbols'] as $symbol) {
+                $notions[$symbol['symbol']] = $symbol;
+            }
+            Cache::put('notions', $notions, now()->addMinutes(30));
+        }
+        if ($filter) {
+            return $notions[$filter];
+        }
+        return $notions;
+    }
+
+    public static function getStepSize($symbol)
+    {
+        $notion = self::getNotions($symbol);
+        if (isset($notion['filters'])){
+            foreach ($notion['filters'] as $filter) {
+                if (isset($filter['stepSize']))
+                    return $filter['stepSize'];
+            }
+        }
+        return 0.01;
     }
 
 }

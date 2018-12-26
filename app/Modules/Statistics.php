@@ -38,7 +38,7 @@ class Statistics extends Modules
     {
         $orders = Order::where('created_at', '>=', Carbon::now()->subDays(1))
             ->whereHas('sellOrder')
-            ->where('comment','from_signal')
+            ->whereHas('signal')
             ->get();
 
         $totalProfit = 0;

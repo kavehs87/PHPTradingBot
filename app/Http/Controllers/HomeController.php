@@ -80,10 +80,9 @@ class HomeController extends Controller
         $order = null;
         $showSymbol = false;
 
-        if (Route::currentRouteName() == 'showSymbol'){
+        if (Route::currentRouteName() == 'showSymbol') {
             $showSymbol = true;
-        }
-        else {
+        } else {
             if ($id) {
                 $order = Order::find($id);
             }
@@ -115,18 +114,51 @@ class HomeController extends Controller
         return $html;
     }
 
-    public function history()
+    public function history($column = 'created_at', $sortType = 'desc')
     {
         $since = Carbon::now()->subDays(30);
-        $orders = Order::where('created_at', '>', $since)
-            ->where('side', 'BUY')
-            ->whereHas('sellOrder')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
 
-        $all = $orders;
+        // todo change to join queries
+
+        if ($column == 'pl') {
+            $orders = Order::where('created_at', '>', $since)
+                ->where('side', 'BUY')
+                ->whereHas('sellOrder')
+                ->orderBy('maxFloated', $sortType)
+                ->paginate(20);
+            $all = $orders->sort(function ($a, $b) {
+                $aPL = $a->getPL(true);
+                $bPL = $b->getPL(true);
+                return $aPL < $bPL;
+            });
+        } elseif ($column == 'sell_date') {
+            $orders = Order::where('created_at', '>', $since)
+                ->where('side', 'BUY')
+                ->whereHas('sellOrder')
+                ->orderBy('created_at', $sortType)
+                ->paginate(20);
+            $all = $orders->sort(function ($a, $b) use ($sortType) {
+                $aPL = $a->sellOrder->created_at;
+                $bPL = $b->sellOrder->created_at;
+                if ($sortType == 'asc')
+                    return $aPL > $bPL;
+                if ($sortType == 'desc')
+                    return $aPL < $bPL;
+            });
+        } else {
+            $orders = Order::where('created_at', '>', $since)
+                ->where('side', 'BUY')
+                ->whereHas('sellOrder')
+                ->orderBy($column, $sortType)
+                ->paginate(20);
+            $all = $orders;
+        }
+
         return view('history', [
-            'all' => $all
+            'orders' => $orders,
+            'all' => $all,
+            'column' => $column,
+            'sortType' => $sortType
         ]);
     }
 
@@ -135,7 +167,8 @@ class HomeController extends Controller
      * @return bool
      * @throws \Exception
      */
-    public function closePosition($id)
+    public
+    function closePosition($id)
     {
         $buyId = Order::find($id);
 
@@ -148,31 +181,35 @@ class HomeController extends Controller
      * @param Request $request
      * @return void
      */
-    public function editPosition($id, Request $request)
+    public
+    function editPosition($id, Request $request)
     {
         $order = Order::find($id);
 
         $data = $request->except('_token');
 
         foreach ($data as $property => $value) {
-            $order->{$property} = $value;
+            if ($value != '-')
+                $order->{$property} = $value;
         }
 
         $order->save();
         return redirect()->back()->with('success', 'position modified.');
     }
 
-    public function newPosition($market, $quantity, $tp = 0, $sl = 0, $ttp = 0, $tsl = 0)
+    public function newPosition($market, $quantity, $tp = null, $sl = null, $ttp = null, $tsl = null, Request $request)
     {
         $options = [];
-        if ($tp != 0 && $sl != 0 && $ttp != 0 && $tsl != 0) {
-            $options = [
-                'tp' => $tp,
-                'sl' => $sl,
-                'ttp' => $ttp,
-                'tsl' => $tsl
-            ];
-        }
+
+        if ($tp != '-')
+            $options['tp'] = $tp;
+        if ($sl != '-')
+            $options['sl'] = $sl;
+        if ($ttp != '-')
+            $options['ttp'] = $ttp;
+        if ($tsl != '-')
+            $options['tsl'] = $tsl;
+
         $symbol = TradeHelper::market2symbol($market);
         $buyId = Order::buy($symbol, $quantity, '', $options);
 
@@ -180,39 +217,45 @@ class HomeController extends Controller
         return redirect(route('positions'))->with('success', 'position opened.');
     }
 
-    public function modules()
+    public
+    function modules()
     {
         return view('modules');
     }
 
-    public function enableModule($moduleId)
+    public
+    function enableModule($moduleId)
     {
         $module = Modules::find($moduleId);
         $module->setActive();
         return redirect()->back();
     }
 
-    public function disableModule($moduleId)
+    public
+    function disableModule($moduleId)
     {
         $module = Modules::find($moduleId);
         $module->setInactive();
         return redirect()->back();
     }
 
-    public function installModule($moduleName)
+    public
+    function installModule($moduleName)
     {
         Modules::install($moduleName);
         return redirect()->back();
     }
 
-    public function uninstallModule($moduleId)
+    public
+    function uninstallModule($moduleId)
     {
         $module = Modules::find($moduleId);
         $module->delete();
         return redirect()->back();
     }
 
-    public function saveSettings(Request $request)
+    public
+    function saveSettings(Request $request)
     {
         $binance = $request->get('binance');
         $miningHamster = $request->get('miningHamster');
@@ -229,7 +272,8 @@ class HomeController extends Controller
         return redirect()->back()->with('success');
     }
 
-    public function saveOrderDefaults(Request $request)
+    public
+    function saveOrderDefaults(Request $request)
     {
         $data = $request->except('_token');
         Setting::setValue('orderDefaults', $data['orderDefaults']);
@@ -238,7 +282,8 @@ class HomeController extends Controller
     }
 
 
-    public function toggleTrailing($id)
+    public
+    function toggleTrailing($id)
     {
         $order = Order::find($id);
         $order->trailing = !$order->trailing;
@@ -246,7 +291,8 @@ class HomeController extends Controller
         return redirect()->back();
     }
 
-    public function savePosition(Request $request)
+    public
+    function savePosition(Request $request)
     {
         $order = Order::find($request->get('id'));
         $order->takeProfit = $request->get('tp');

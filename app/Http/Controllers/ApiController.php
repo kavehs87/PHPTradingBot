@@ -22,6 +22,7 @@ class ApiController extends Controller
                 'id' => $open->id,
                 'symbol' => $open->symbol,
                 'pl' => round($open->getPL(),2),
+                'qty' => $open->origQty,
             ];
         }
         return $positions;

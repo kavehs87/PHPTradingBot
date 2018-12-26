@@ -113,7 +113,6 @@ class Order extends Model
             if (isset($options['signal_id']))
                 $order->signal_id = $options['signal_id'];
         }
-
         if ($comment) {
             $order->comment = $comment;
         }

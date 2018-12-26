@@ -60,10 +60,10 @@
         var orderId = "{{isset($order) ? $order->id : ''}}";
         var pair = document.getElementById("pair").value;
         var quantity = document.getElementById("quantity").value;
-        var tp = document.getElementById("tp").value ? document.getElementById("tp").value : 0;
-        var ttp = document.getElementById("ttp").value ? document.getElementById("ttp").value : 0;
-        var sl = document.getElementById("sl").value ? document.getElementById("sl").value : 0;
-        var tsl = document.getElementById("tsl").value ? document.getElementById("tsl").value : 0;
+        var tp = document.getElementById("tp").value ? document.getElementById("tp").value : "-";
+        var ttp = document.getElementById("ttp").value ? document.getElementById("ttp").value : "-";
+        var sl = document.getElementById("sl").value ? document.getElementById("sl").value : "-";
+        var tsl = document.getElementById("tsl").value ? document.getElementById("tsl").value : "-";
 
         axios.post(url, {
             id: orderId,
@@ -82,11 +82,13 @@
     function openPosition() {
         var pair = document.getElementById("pair").value;
         var quantity = document.getElementById("quantity").value;
-        var tp = document.getElementById("tp").value ? document.getElementById("tp").value : 0;
-        var ttp = document.getElementById("ttp").value ? document.getElementById("ttp").value : 0;
-        var sl = document.getElementById("sl").value ? document.getElementById("sl").value : 0;
-        var tsl = document.getElementById("tsl").value ? document.getElementById("tsl").value : 0;
-        window.location.href = '/positions/new/' + pair + "/" + quantity + "/" + tp + "/" + sl + "/" + ttp + "/" + tsl;
+        var tp = document.getElementById("tp").value ? document.getElementById("tp").value : "-";
+        var ttp = document.getElementById("ttp").value ? document.getElementById("ttp").value : "-";
+        var sl = document.getElementById("sl").value ? document.getElementById("sl").value : "-";
+        var tsl = document.getElementById("tsl").value ? document.getElementById("tsl").value : "-";
+
+        var url = '/positions/new/' + pair + "/" + quantity + "/" + tp + "/" + sl + "/" + ttp + "/" + tsl;
+        window.location.href = url;
     }
 </script>
 <script>

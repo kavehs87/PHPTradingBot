@@ -15,7 +15,8 @@ Route::get('/', 'HomeController@system');
 Route::get('/signals', 'HomeController@signals')->name('signals');
 Route::get('/system', 'HomeController@system')->name('system');
 Route::get('/events', 'HomeController@events')->name('events');
-Route::get('/history', 'HomeController@history')->name('history');
+Route::get('/history/', 'HomeController@history')->name('history');
+Route::get('/history/{column?}/{sort?}', 'HomeController@history')->name('sortHistory');
 Route::get('/positions/{id?}', 'HomeController@positions')->name('positions');
 Route::get('/positions/{id?}/show', 'HomeController@positions')->name('showSymbol');
 Route::get('/positions/toggleTrailing/{id}', 'HomeController@toggleTrailing')->name('toggleTrailing');
@@ -50,17 +51,28 @@ try {
 
 
 Route::get('/debug', function () {
-//    dd(\App\Modules::getModules());
 
-//    $order = \App\Order::find(979);
-//    $order->trailing = true;
-//    $order->save();
-//
-//    dd($order->toArray());
 
-//    dd(\App\TradeHelper::recentlyTradedPairs(\Carbon\Carbon::now()->subDays(1)));
+//    $amount = 11; // usdt
+//    $symbol = 'BTCUSDT';
+//    $notions = \App\TradeHelper::getNotions($symbol);
+//    $stepSize = \App\TradeHelper::getStepSize($symbol);
+//    $baseAsset = $notions['baseAsset'];
+//    $binance = \App\TradeHelper::getBinance();
+//    $quantity = \App\TradeHelper::calcUSDT($amount, $baseAsset);
+//    $quantity = $binance->roundStep($quantity,$stepSize);
+//    $res = $binance->marketBuyTest($symbol, $quantity);
+//    dd($res);
 
-//    dd(\App\Signal::where('id','!=',12121212)->delete());
-//    dd(\App\Order::find(2)->signal);
 
+    $amount = 11; // usdt
+    $symbol = 'BTCUSDT';
+    $notions = \App\TradeHelper::getNotions($symbol);
+    $stepSize = \App\TradeHelper::getStepSize($symbol);
+    $baseAsset = $notions['baseAsset'];
+    $binance = \App\TradeHelper::getBinance();
+    $quantity = \App\TradeHelper::calcUSDT($amount, $baseAsset);
+    $quantity = $binance->roundStep($quantity, $stepSize);
+    $res = $binance->marketSellTest($symbol, $quantity);
+    dd($res);
 });

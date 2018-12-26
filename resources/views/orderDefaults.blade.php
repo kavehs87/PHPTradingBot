@@ -39,11 +39,3 @@
         <input type="submit" value="Save" class="btn btn-primary col-2">
     </form>
 </div>
-
-<script>
-    function openPosition() {
-        var pair = document.getElementById("pair").value;
-        var quantity = document.getElementById("quantity").value;
-        window.location.href = '/positions/new/' + pair + "/" + quantity;
-    }
-</script>
