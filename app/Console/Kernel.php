@@ -2,9 +2,11 @@
 
 namespace App\Console;
 
+use App\Console\Commands\HealthCheck;
 use App\Console\Commands\Orders;
 use App\Console\Commands\Prices;
 use App\Console\Commands\Signals;
+use App\Console\Commands\Ticker;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -16,9 +18,10 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        Prices::class,
         Signals::class,
-        Orders::class
+        Orders::class,
+        HealthCheck::class,
+        Ticker::class
     ];
 
     /**

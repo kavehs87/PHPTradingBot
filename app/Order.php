@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Cache;
  * @property bool trailing
  * @property null comment
  * @property null signal_id
+ * @property bool|float|int pl
  */
 class Order extends Model
 {
@@ -73,11 +74,6 @@ class Order extends Model
         }
 
 
-        $prices = json_decode(Cache::get('prices'), true);
-        if (!isset($prices[$symbol])) {
-            throw new \Exception("price for the specified symbol not found in cache");
-        }
-
         $side = 'BUY';
         $type = 'MARKET';
         $timeInForce = 'GTC';
@@ -88,7 +84,7 @@ class Order extends Model
         $order->orderId = rand(1, 9999999);
         $order->clientOrderId = rand(1, 999);
         $order->transactTime = $timestamp;
-        $order->price = $prices[$symbol];
+        $order->price = TradeHelper::getPrice($symbol);
         $order->origQty = $quantity;
         $order->executedQty = $quantity;
         $order->cummulativeQuoteQty = $quantity;
@@ -157,12 +153,6 @@ class Order extends Model
             return false;
         }
 
-
-        $prices = json_decode(Cache::get('prices'), true);
-        if (!isset($prices[$symbol])) {
-            throw new \Exception("price for the specified symbol not found in cache");
-        }
-
         $side = 'SELL';
         $type = 'MARKET';
         $timeInForce = 'GTC';
@@ -173,7 +163,7 @@ class Order extends Model
         $order->orderId = rand(1, 9999999);
         $order->clientOrderId = rand(1, 999);
         $order->transactTime = $timestamp;
-        $order->price = $prices[$symbol];
+        $order->price = TradeHelper::getPrice($symbol);;
         $order->origQty = $quantity;
         $order->executedQty = $quantity;
         $order->cummulativeQuoteQty = $quantity;
@@ -182,11 +172,15 @@ class Order extends Model
         $order->type = $type;
         $order->side = $side;
         $order->buyId = $buyId;
+        $buyOrder = self::find($buyId);
+        $buyOrder->sell_date = now();
+
         if ($comment) {
             $order->comment = $comment;
         }
 
         $order->save();
+        $buyOrder->save();
 
         /*
          * Modules after hook
@@ -235,11 +229,6 @@ class Order extends Model
 
     public function getPL($history = false)
     {
-        $prices = json_decode(Cache::get('prices'), true);
-        if (!isset($prices[$this->symbol])) {
-            return false;
-        }
-
         if (!$this->isOpen()) {
             if ($history) {
                 $buyPrice = $this->price;
@@ -249,7 +238,7 @@ class Order extends Model
             }
         } else {
             $buyPrice = $this->price;
-            $nowPrice = $prices[$this->symbol];
+            $nowPrice = TradeHelper::getPrice($this->symbol);
         }
 
 
@@ -258,11 +247,7 @@ class Order extends Model
 
     public function getCurrentPrice()
     {
-        $prices = json_decode(Cache::get('prices'), true);
-        if (!isset($prices[$this->symbol])) {
-            return false;
-        }
-        return $prices[$this->symbol];
+        return TradeHelper::getPrice($this->symbol);
     }
 
     public function inProfit()
@@ -296,6 +281,14 @@ class Order extends Model
             return $buyDate->diffForHumans($sellDate, true);
         }
         return false;
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+        static::updating(function (Order $order) {
+            $order->pl = $order->getPL(true);
+        });
     }
 
     public function updateState()

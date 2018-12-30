@@ -1,0 +1,5 @@
+- [ ] Data Cleaner - garbage collection
+- [ ] bug with SL to TP reversal (reset trailing)
+- [ ] Stats module
+- [ ] Mining Hamster Sell Signal intervention
+- [ ] Modules can stop sell/buy

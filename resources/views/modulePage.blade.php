@@ -1,5 +1,6 @@
-@extends('layout')
+@extends('layouts.app')
 
-@section('body')
+@section('content')
     {!! $output !!}
+
 @endsection

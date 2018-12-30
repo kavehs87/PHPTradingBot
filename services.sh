@@ -4,9 +4,9 @@ if [ $1 = "daemon" ]; then
     echo "daemon"
     while sleep 1
     do
-    PID=$(ps aux | grep 'daemon:price' | grep -v grep | awk '{print $2}')
+    PID=$(ps aux | grep 'daemon:ticker' | grep -v grep | awk '{print $2}')
     if [[ -z $PID ]]; then
-        php artisan daemon:price &>/dev/null &
+        php artisan daemon:ticker &>/dev/null &
     fi
 
     PID=$(ps aux | grep 'daemon:signals' | grep -v grep | awk '{print $2}')
@@ -30,11 +30,11 @@ fi
 
 if [ $1 = "status" ]; then
     echo "status ..."
-    PID=$(ps aux | grep 'daemon:price' | grep -v grep | awk '{print $2}')
+    PID=$(ps aux | grep 'daemon:ticker' | grep -v grep | awk '{print $2}')
     if [[ -z $PID ]]; then
-        echo "Price Daemon Stopped"
+        echo "ticker Daemon Stopped"
         else
-        echo "Price Daemon Running"
+        echo "ticker Daemon Running"
     fi
 
     PID=$(ps aux | grep 'daemon:signals' | grep -v grep | awk '{print $2}')

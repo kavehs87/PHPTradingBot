@@ -44,7 +44,7 @@ class CoinMarketCap extends Modules
 
     public function loadCoinMarketCap()
     {
-        $binance_pairs = array_keys(json_decode(Cache::get('prices'), true) ?? []);
+        $binance_pairs = \App\TradeHelper::getSymbols() ?? [];
 
         libxml_use_internal_errors(true);
 

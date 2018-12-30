@@ -3,12 +3,38 @@
 @import url('https://fonts.googleapis.com/css?family=Nunito');
 
 // Variables
-@import 'variables';
+//@import 'variables';
+@import "theme/variables";
 
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
 
-.navbar-laravel {
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+
+
+@import "~jquery-ui/themes/base/base.css";
+@import "~jquery-ui/themes/base/theme.css";
+@import "~jquery-ui/themes/base/menu.css";
+@import "~jquery-ui/themes/base/autocomplete.css";
+
+@import "./font-awesome-4.7.0/scss/font-awesome";
+
+//@import './theme.css';
+//@import "theme/bootswatch";
+
+//.navbar-laravel {
+//  background-color: #fff;
+//  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+//}
+
+
+.footer {
+  clear: both;
+  position: relative;
+  height: 40px;
+  text-align: center;
+  padding-top: -40px;
+}
+
+.toggleFavorite {
+  cursor: pointer;
 }

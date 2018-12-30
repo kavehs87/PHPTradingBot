@@ -10,6 +10,7 @@ namespace App;
 
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class TradeHelper
@@ -21,6 +22,8 @@ class TradeHelper
 
     public static function getPercent($buy, $current)
     {
+        if ($buy == 0 || $current == 0)
+            return null;
         return (($current - $buy) * 100) / $current;
     }
 
@@ -96,13 +99,11 @@ class TradeHelper
 
     public static function calcUSDT($amount, $symbol)
     {
-        $prices = Cache::get('prices', []);
-        $prices = json_decode($prices, true);
-        if (isset($prices[$symbol . 'USDT'])) {
-            $usdtPrice = $prices[$symbol . 'USDT'];
+        if ($price = self::getPrice($symbol . 'USDT')) {
+            $usdtPrice = $price;
         } else {
-            $btcPrice = $prices['BTCUSDT'];
-            $symbol2btc = $prices[$symbol . 'BTC'];
+            $btcPrice = self::getPrice('BTCUSDT');
+            $symbol2btc = self::getPrice($symbol . 'USDT');
 
             $usdtPrice = $symbol2btc * $btcPrice;
         }
@@ -131,7 +132,7 @@ class TradeHelper
     public static function getStepSize($symbol)
     {
         $notion = self::getNotions($symbol);
-        if (isset($notion['filters'])){
+        if (isset($notion['filters'])) {
             foreach ($notion['filters'] as $filter) {
                 if (isset($filter['stepSize']))
                     return $filter['stepSize'];
@@ -140,4 +141,120 @@ class TradeHelper
         return 0.01;
     }
 
+    public static function getTick($symbol)
+    {
+        $tick = Cache::get($symbol);
+        if ($tick == null) {
+            // get last data for symbol
+            try {
+                $price = self::getBinance()->price($symbol);
+            } catch (\Exception $e) {
+                return false;
+                // when signal symbol is not supported by exchange class TODO
+            }
+            $tick = ['symbol' => $symbol, 'close' => $price];
+            Cache::put($symbol, $tick, now()->addSeconds(5));
+        }
+
+        return $tick;
+    }
+
+    public static function getPrice($symbol)
+    {
+        $tick = self::getTick($symbol);
+        return $tick['close'];
+    }
+
+    public static function getSymbols()
+    {
+        if (Cache::has('symbols')) {
+            return Cache::get('symbols');
+        }
+        $symbols = [];
+        try {
+            ob_start();
+            $binance = $exchangeInfo = self::getBinance();
+            $exchangeInfo = $binance->exchangeInfo();
+            ob_clean();
+            if (empty($exchangeInfo)) {
+                return [];
+            }
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        foreach ($exchangeInfo['symbols'] as $symbol) {
+            $symbols[] = $symbol['symbol'];
+        }
+        Cache::put('symbols', $symbols, now()->addMinutes(30));
+        return $symbols;
+    }
+
+
+    /**
+     * @param $command
+     * @param $service
+     * @param bool $background
+     * @return bool
+     * @throws \Exception
+     */
+    public static function systemctl($service, $command, $background = true)
+    {
+
+        if ($service == 'all') {
+            self::systemctl('ticker', $command);
+            self::systemctl('orders', $command);
+            self::systemctl('signal', $command);
+            sleep(2);
+            return true;
+        }
+
+        $phpBinary = exec("which php");
+        if (!$phpBinary) {
+            throw new \Exception('cannot find php binary');
+        }
+
+        $cmd = 'cd ' . base_path() . '; ';
+        switch ($command) {
+            case 'status':
+                $cmd .= "echo $(ps aux | grep 'daemon:$service' | grep -v grep | awk '{print $2}')";
+                exec($cmd, $output, $return);
+                if (isset($output[0]) && $output[0] != null) {
+                    return true;
+                }
+                return false;
+            case 'restart':
+                $stop = self::systemctl($service, 'stop');
+                $start = self::systemctl($service, 'start');
+                if ($start && $stop) {
+                    return true;
+                }
+                return false;
+            case 'start':
+                $cmd .= $phpBinary . ' artisan daemon:' . $service;
+                break;
+            case 'stop':
+                $cmd .= "kill $(ps aux | grep 'daemon:$service' | grep -v grep | awk '{print $2}')";
+                break;
+        }
+
+
+        if ($background) {
+            $cmd .= ' > /dev/null 2>&1 &';
+        }
+        $result = exec($cmd, $output, $return);
+        return self::systemctl($service, 'status');
+    }
+
+    public static function isFavorite($symbol)
+    {
+        if ($user = Auth::user()) {
+            $favorites = $user->favorites;
+            $favorites = json_decode($favorites);
+            if (in_array($symbol, $favorites)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -16,11 +16,18 @@ use App\Signal;
 use App\TradeHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 
 class HomeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         return view('index');
@@ -28,55 +35,43 @@ class HomeController extends Controller
 
     public function signals()
     {
-        return view('signals', [
+        return view('pages.signals', [
             'signals' => Signal::orderBy('created_at', 'desc')->paginate(10)
         ]);
     }
 
     public function system()
     {
-
-        $balances = [];
         $binanceConfig = Setting::getValue('binance');
-        if ($binanceConfig) {
-            if (Cache::get('balances')) {
-                $balances = json_decode(Cache::get('balances'), true);
-            } else {
 
-                $binance = new \Binance\API($binanceConfig['api'], $binanceConfig['secret']);
-                if (isset($binanceConfig['proxyEnabled']) && $binanceConfig['proxyEnabled'] != false) {
-                    $binance->setProxy([
-                        'proto' => $binanceConfig['proxy']['proto'],
-                        'address' => $binanceConfig['proxy']['host'],
-                        'port' => $binanceConfig['proxy']['port'],
-                        'username' => $binanceConfig['proxy']['username'],
-                        'password' => $binanceConfig['proxy']['password'],
-                    ]);
-                }
-                $balances = null;
-                foreach ($binance->balances() as $coin => $balance) {
-                    if ($balance['available'] != 0) {
-                        $balances[$coin] = $balance;
-                    }
-                }
-                Cache::put('balances', json_encode($balances), Carbon::now()->addMinutes(5));
-            }
-        }
-
-
-        $lastPrices = Cache::get('prices');
-        return view('system', [
-            'lastPrices' => json_decode($lastPrices, true),
-            'balances' => $balances,
+        $lastTick = Cache::get('lastTick');
+        $diffTicks = $lastTick ? Carbon::createFromTimestamp($lastTick)->diffInSeconds(now()) : null;
+        return view('pages.system', [
+            'diffTicks' => $diffTicks,
             'binanceConfig' => $binanceConfig,
+            'tickerStatus' => TradeHelper::systemctl('ticker', 'staus'),
+            'ordersStatus' => TradeHelper::systemctl('orders', 'staus'),
+            'signalStatus' => TradeHelper::systemctl('signal', 'staus'),
         ]);
+    }
+
+    public function systemCtl($command, $service)
+    {
+        try {
+            $result = TradeHelper::systemctl($service, $command);
+        } catch (\Exception $exception) {
+            $result = false;
+        }
+        if ($result) {
+            return redirect()->back()->with('success');
+        }
+        return redirect()->back()->withErrors('failed to ' . $command . ' ' . $service . ' service.');
     }
 
     public function positions($id = null)
     {
         $open = Order::getOpenPositions();
         $count = count(Order::getOpenPositions(true));
-        $prices = Cache::get('prices');
         $order = null;
         $showSymbol = false;
 
@@ -89,9 +84,8 @@ class HomeController extends Controller
         }
 
 
-        return view('positions', [
+        return view('pages.positions', [
             'open' => $open,
-            'prices' => json_decode($prices, true),
             'allCount' => $count,
             'order' => $order,
             'show' => $showSymbol,
@@ -104,10 +98,8 @@ class HomeController extends Controller
         $open = Order::getOpenPositions();
         $count = count(Order::getOpenPositions(true));
 
-        $prices = Cache::get('prices');
-        $html = view('openTable', [
+        $html = view('parts.openTable', [
             'open' => $open,
-            'prices' => json_decode($prices, true),
             'allCount' => $count
         ]);
 
@@ -120,41 +112,14 @@ class HomeController extends Controller
 
         // todo change to join queries
 
-        if ($column == 'pl') {
-            $orders = Order::where('created_at', '>', $since)
-                ->where('side', 'BUY')
-                ->whereHas('sellOrder')
-                ->orderBy('maxFloated', $sortType)
-                ->paginate(20);
-            $all = $orders->sort(function ($a, $b) {
-                $aPL = $a->getPL(true);
-                $bPL = $b->getPL(true);
-                return $aPL < $bPL;
-            });
-        } elseif ($column == 'sell_date') {
-            $orders = Order::where('created_at', '>', $since)
-                ->where('side', 'BUY')
-                ->whereHas('sellOrder')
-                ->orderBy('created_at', $sortType)
-                ->paginate(20);
-            $all = $orders->sort(function ($a, $b) use ($sortType) {
-                $aPL = $a->sellOrder->created_at;
-                $bPL = $b->sellOrder->created_at;
-                if ($sortType == 'asc')
-                    return $aPL > $bPL;
-                if ($sortType == 'desc')
-                    return $aPL < $bPL;
-            });
-        } else {
-            $orders = Order::where('created_at', '>', $since)
-                ->where('side', 'BUY')
-                ->whereHas('sellOrder')
-                ->orderBy($column, $sortType)
-                ->paginate(20);
-            $all = $orders;
-        }
+        $orders = Order::where('created_at', '>', $since)
+            ->where('side', 'BUY')
+            ->whereHas('sellOrder')
+            ->orderBy($column, $sortType)
+            ->paginate(20);
+        $all = $orders;
 
-        return view('history', [
+        return view('pages.history', [
             'orders' => $orders,
             'all' => $all,
             'column' => $column,
@@ -220,7 +185,7 @@ class HomeController extends Controller
     public
     function modules()
     {
-        return view('modules');
+        return view('pages.modules');
     }
 
     public
@@ -258,16 +223,30 @@ class HomeController extends Controller
     function saveSettings(Request $request)
     {
         $binance = $request->get('binance');
-        $miningHamster = $request->get('miningHamster');
-
-
-        if ($binance) {
+        if (!$request->get('proxyEnabled')) {
+            unset($binance['proxy']);
+        }
+        if ($request->has('orderDefaults')) {
+            Setting::setValue('orderDefaults', $request->get('orderDefaults'));
+        }
+        if ($binance['api'] != null || $binance['api'] != null) {
             Setting::setValue('binance', $binance);
         }
-        if ($miningHamster) {
-            Setting::setValue('miningHamster', $miningHamster);
-        }
 
+        foreach ($request->all() as $key => $item) {
+            if (!is_array($item) && $key != '_token') {
+                Setting::setValue($key, $item);
+            }
+        }
+        if ($request->get('trainingMode') != '1') {
+            Setting::setValue('trainingMode', null);
+        }
+        if ($request->get('modulesCanStopOrders') != '1') {
+            Setting::setValue('modulesCanStopOrders', null);
+        }
+        if ($request->get('saveTicker') != '1') {
+            Setting::setValue('saveTicker', null);
+        }
 
         return redirect()->back()->with('success');
     }
@@ -301,6 +280,45 @@ class HomeController extends Controller
         $order->trailingStopLoss = $request->get('tsl');
         $order->save();
         return response('success', 200);
+    }
+
+    public function favorites()
+    {
+        if (isset(Auth::user()->favorites)) {
+            $favorites = Auth::user()->favorites;
+            if (!$favorites) {
+                echo '[]';
+            }
+            return response(unserialize($favorites), 200);
+        }
+        echo '[]';
+    }
+
+    public function toggleFavorite($symbol)
+    {
+        $favorites = [];
+        if (Auth::user()) {
+            $favorites = Auth::user()->favorites;
+            $favorites = unserialize($favorites);
+            if (!in_array($symbol, $favorites)) {
+                $favorites[] = $symbol;
+            } else {
+                if (($key = array_search($symbol, $favorites)) !== false) {
+                    unset($favorites[$key]);
+                }
+            }
+        }
+        $user = Auth::user();
+        $user->favorites = serialize($favorites);
+        $user->save();
+
+        return response(unserialize($user->favorites), 200);
+    }
+
+    public function recentOrders()
+    {
+        $orders = Order::where('sell_date', '>', now()->subDays(7))->orderBy('sell_date','desc')->limit(20)->get();
+        return $orders->toArray();
     }
 
 

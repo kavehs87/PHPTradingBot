@@ -9,9 +9,12 @@ window._ = require('lodash');
 
 try {
     window.Popper = require('popper.js').default;
-    window.$ = window.jQuery = require('jquery');
+    // window.$ = window.jQuery = require('jquery');
+    global.$ = global.jQuery = require('jquery');
 
     require('bootstrap');
+    require('jquery-ui/ui/widgets/autocomplete');
+
 } catch (e) {}
 
 /**

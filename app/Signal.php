@@ -23,7 +23,7 @@ class Signal extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            if ($model->signalmode == 'buy'){
+            if ($model->signalmode == 'buy') {
                 $symbol = TradeHelper::market2symbol($model->market);
 
                 /*
@@ -35,7 +35,8 @@ class Signal extends Model
                         $module->getFactory()->onSignalReceived($model);
                     }
                 }
-                Order::buy($symbol,10,'',[
+                $defaultQuantity = Setting::getValue('orderDefaults')['amount'];
+                Order::buy($symbol, $defaultQuantity, '', [
                     'signal_id' => $model->signalID
                 ]);
             }

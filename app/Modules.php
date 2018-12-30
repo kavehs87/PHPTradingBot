@@ -24,7 +24,7 @@ class Modules extends Model
     public static $hasMenu = false;
 
 
-    public static function factory($module)
+    public static function init($module)
     {
         return self::getModuleWithNameSpace($module)::where('class', $module)->first();
     }
@@ -142,12 +142,12 @@ class Modules extends Model
 
     public function getObject()
     {
-        return self::factory($this->class);
+        return self::init($this->class);
     }
 
     public function getFactory()
     {
-        return self::factory($this->class);
+        return self::init($this->class);
     }
 
     public static function getMenus()
