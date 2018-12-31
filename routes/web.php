@@ -66,23 +66,40 @@ Route::group(['middleware' => 'auth'], function () {
     }
 });
 
-Route::get('/createAdmin', function () {
-    dd('security enabled :D');
-    $u = new \App\User();
-    $u->name = 'Kaveh Sarkhanlou';
-    $u->email = 'kaveh.s@live.com';
-    $u->password = \Illuminate\Support\Facades\Hash::make('123456');
-    try {
-        $u->save();
-    }
-    catch (\Exception $e){
-        dd($e->getMessage());
-    }
+Route::get('/debug/css', function () {
+    return view('css');
 });
 
 Route::get('/debug', function () {
-    dd(\App\TradeHelper::getPrice('CMTETH'));
-    dd(\App\TradeHelper::getTick('CMTETH'));
+
+
+    $binance = \App\TradeHelper::getBinance();
+    $time1 = now();
+//    for ($i=0;$i<= 4;$i++){
+//        $_ = $binance->marketBuyTest('BTCUSDT',40);
+//        $_ = $binance->marketBuyTest('ETHUSDT',40);
+//        dump($_);
+//    }
+
+    $_ = $binance->marketBuyTest('BTCUSDT',40);
+    $_ = $binance->marketBuyTest('ETHUSDT',40);
+    $_ = $binance->marketBuyTest('BTCUSDT',40);
+    $_ = $binance->marketBuyTest('ETHUSDT',40);
+    $_ = $binance->marketBuyTest('BTCUSDT',40);
+    $_ = $binance->marketBuyTest('ETHUSDT',40);
+    $_ = $binance->marketBuyTest('BTCUSDT',40);
+    $_ = $binance->marketBuyTest('ETHUSDT',40);
+    $_ = $binance->marketBuyTest('BTCUSDT',40);
+    $_ = $binance->marketBuyTest('ETHUSDT',40);
+
+
+    $time2 = now();
+
+    dd($time2->diffForHumans($time1));
+
+
+//    dd(\App\TradeHelper::getPrice('CMTETH'));
+//    dd(\App\TradeHelper::getTick('CMTETH'));
 //dd(\Illuminate\Support\Facades\Cache::get('CMTETH'));
 
 //    print_r(\App\Setting::all()->toArray());

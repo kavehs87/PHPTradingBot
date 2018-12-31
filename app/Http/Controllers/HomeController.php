@@ -300,6 +300,8 @@ class HomeController extends Controller
         if (Auth::user()) {
             $favorites = Auth::user()->favorites;
             $favorites = unserialize($favorites);
+            if (!$favorites)
+                $favorites = [];
             if (!in_array($symbol, $favorites)) {
                 $favorites[] = $symbol;
             } else {
